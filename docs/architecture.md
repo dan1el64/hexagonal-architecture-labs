@@ -4,6 +4,11 @@ Each bounded context has a domain, application use case, port and adapters. The 
 
 ## Dependency direction
 
+![Hexagonal dependency direction](dependency-direction.svg)
+
+<details>
+<summary>Editable Mermaid source</summary>
+
 ```mermaid
 flowchart LR
   CLI[CLI: inbound adapter and composition root] --> USE[ReserveStock / EvaluateResponses]
@@ -13,6 +18,8 @@ flowchart LR
   SQL[SQLite adapter] -. implements .-> PORT
   FIX[Synthetic fixture adapter] -. implements .-> PORT
 ```
+
+</details>
 
 Solid arrows show source dependencies. Dashed arrows show implementation of a port. At runtime, injected adapters receive calls through those ports. Inventory and evaluation remain separate bounded contexts; they do not share business entities.
 
@@ -25,6 +32,11 @@ The persistence contract deliberately includes the transaction boundary. A check
 An idempotency key identifies the full request. The same key and payload return the original reservation. A different payload with the same key is rejected. Insert-only initialization avoids accidental inventory replenishment after restarting the CLI.
 
 For production, add migrations, structured business error mapping, an explicit SKU lifecycle, stock adjustments, reservation expiration, authentication and authorization. A SQL adapter would need database-specific concurrency tests. Do not assume this SQLite demonstration solves distributed consistency.
+
+![Atomic reservation transaction](reservation-transaction.svg)
+
+<details>
+<summary>Editable Mermaid source</summary>
 
 ```mermaid
 sequenceDiagram
@@ -45,6 +57,8 @@ sequenceDiagram
   Store->>DB: COMMIT
   Store-->>CLI: Reservation result through use case
 ```
+
+</details>
 
 Conflicting request payloads and insufficient stock raise errors and roll back. The transaction boundary belongs to the atomic store contract, rather than separate read/write ports.
 
