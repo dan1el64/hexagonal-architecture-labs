@@ -2,6 +2,20 @@
 
 Each bounded context has a domain, application use case, port and adapters. The CLI is an inbound adapter and composition root. It constructs outbound adapters and injects them into the application. The filesystem dataset loader stays outside the core.
 
+## Dependency direction
+
+```mermaid
+flowchart LR
+  CLI[CLI: inbound adapter and composition root] --> USE[ReserveStock / EvaluateResponses]
+  USE --> DOMAIN[Reservation / EvaluationCase / rubric]
+  USE --> PORT[ReservationStore / ResponseProvider protocols]
+  MEM[Memory adapter] -. implements .-> PORT
+  SQL[SQLite adapter] -. implements .-> PORT
+  FIX[Synthetic fixture adapter] -. implements .-> PORT
+```
+
+Solid arrows show source dependencies. Dashed arrows show implementation of a port. At runtime, injected adapters receive calls through those ports. Inventory and evaluation remain separate bounded contexts; they do not share business entities.
+
 ## Inventory
 
 `Reservation` rejects empty identifiers and quantities that are not positive integers, including Python booleans. `ReserveStock` translates the request into a domain value and delegates the atomic operation to `ReservationStore`.
@@ -11,6 +25,28 @@ The persistence contract deliberately includes the transaction boundary. A check
 An idempotency key identifies the full request. The same key and payload return the original reservation. A different payload with the same key is rejected. Insert-only initialization avoids accidental inventory replenishment after restarting the CLI.
 
 For production, add migrations, structured business error mapping, an explicit SKU lifecycle, stock adjustments, reservation expiration, authentication and authorization. A SQL adapter would need database-specific concurrency tests. Do not assume this SQLite demonstration solves distributed consistency.
+
+```mermaid
+sequenceDiagram
+  participant CLI
+  participant Use as ReserveStock
+  participant Store as SQLite adapter
+  participant DB as Local database
+  CLI->>Use: execute(request_id, sku, quantity)
+  Use->>Use: Validate Reservation
+  Use->>Store: reserve(reservation)
+  Store->>DB: BEGIN IMMEDIATE
+  Store->>DB: Check request ID and payload
+  alt Existing identical request
+    Store->>DB: Read original result
+  else New request
+    Store->>DB: Conditional stock update and reservation insert
+  end
+  Store->>DB: COMMIT
+  Store-->>CLI: Reservation result through use case
+```
+
+Conflicting request payloads and insufficient stock raise errors and roll back. The transaction boundary belongs to the atomic store contract, rather than separate read/write ports.
 
 ## Response evaluation
 
@@ -23,3 +59,7 @@ A future model adapter should record model/version, prompt and dataset revision,
 ## Why two contexts
 
 Business inventory and evaluation are different domains. They share an architectural style, not entities or business services. Keeping them independent avoids a generic service layer with unrelated responsibilities. Tests enforce inward dependencies; folder names alone do not establish hexagonal architecture.
+
+## Public walkthrough
+
+[Published evaluation case study](https://www.dan1el64.com/portafolio#evaluacion-ia) · [Interview guide in Spanish](interview-walkthrough.md).

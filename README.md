@@ -4,6 +4,8 @@ Two independent, runnable examples of ports and adapters by **Daniel Duran**. Ex
 
 These examples connect full-stack business rules with infrastructure validation and AI evaluation workflows. They use Python's standard library only: no accounts, API keys, paid services or client material.
 
+[Published case study](https://www.dan1el64.com/portafolio#evaluacion-ia) · [Detailed architecture diagrams](docs/architecture.md)
+
 ## Run locally
 
 Requires Python 3.11+. Run from the repository root:
