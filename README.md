@@ -45,7 +45,7 @@ The domain and application do not import SQLite, filesystem APIs or CLI framewor
 - **Explicit failures:** rejected reservations leave stock unchanged; missing response fixtures fail the run instead of inflating pass rates.
 - **Provider boundary:** an actual LLM adapter can implement `generate(case)` without changing the use case. Timeouts, retries, privacy and cost controls belong in that future adapter.
 
-See [architecture and tradeoffs](docs/architecture.md) and [extension exercises](docs/exercises.md).
+See [architecture and tradeoffs](docs/architecture.md) [extension exercises](docs/exercises.md) and the [Spanish interview walkthrough](docs/interview-walkthrough.md).
 
 ## Verification and limits
 
