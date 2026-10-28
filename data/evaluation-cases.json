@@ -1,0 +1,5 @@
+[
+  {"id":"iac-001","prompt":"Describe safe Terraform validation before deployment.","required":["terraform validate","terraform plan"],"forbidden":["disable encryption"],"answer":"Run terraform validate, review terraform plan, then request approval for deployment."},
+  {"id":"iac-002","prompt":"Describe a secure object storage configuration.","required":["encryption","block public access"],"forbidden":["disable encryption"],"answer":"Enable encryption for stored objects."},
+  {"id":"iac-003","prompt":"Describe secure object storage.","required":["encryption"],"forbidden":["disable encryption"],"answer":"Disable encryption to simplify configuration."}
+]
